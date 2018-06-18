@@ -98,7 +98,7 @@ class ScrollerCell:UICollectionViewCell {
         print("Member Pressed")
     }
 
-
+    var imageSave = [URL: UIImage]()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -196,8 +196,21 @@ class ScrollerCell:UICollectionViewCell {
     }
 
     public func SetData(post: TestPost) {
-        downloadImage(url: post.imageURL, profile: false)
-        downloadImage(url: post.profileImageURL, profile: true)
+        let image:UIImage? = imageSave[post.imageURL]
+
+        if (image == nil) {
+            downloadImage(url: post.imageURL, profile: false)
+        } else {
+            self.imageView.setImage(image, for: .normal)
+        }
+
+        let pimage:UIImage? = imageSave[post.profileImageURL]
+
+        if (pimage == nil) {
+            downloadImage(url: post.profileImageURL, profile: true)
+        } else {
+            self.memberView.setImage(pimage, for: .normal)
+        }
 
         addressText.text = post.addressText
         descriptionText.text = "$" + String(format:"%.0f", post.price) + " • " + String(format:"%.0f", post.numberBedrooms) + " Bed • " + String(format:"%.0f", post.numberBathrooms) + " Bath"
@@ -214,9 +227,13 @@ class ScrollerCell:UICollectionViewCell {
             guard let data = data, error == nil else { return }
             DispatchQueue.main.async() {
                 if (profile) {
-                    self.memberView.setImage(UIImage(data: data), for: .normal)
+                    let image:UIImage = UIImage(data: data)!
+                    self.imageSave[url] = image
+                    self.memberView.setImage(image, for: .normal)
                 } else {
-                    self.imageView.setImage(UIImage(data: data), for: .normal)
+                    let image:UIImage = UIImage(data: data)!
+                    self.imageSave[url] = image
+                    self.imageView.setImage(image, for: .normal)
                 }
             }
         }
